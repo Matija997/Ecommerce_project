@@ -3,9 +3,9 @@
     <div class="nav-left">
       <ul class="nav-links">
         <li><router-link to="/">Home</router-link></li>
-        <li><router-link to="/clothing">Clothing</router-link></li>
-        <li><router-link to="/footwear">Footwear</router-link></li>
-        <li><router-link to="/sale">Sale</router-link></li>
+        <li><router-link to="/men">Men</router-link></li>
+        <li><router-link to="/women">Women</router-link></li>
+        <li><router-link to="/kids">Kids</router-link></li>
         <li><router-link to="/about">About</router-link></li>
       </ul>
     </div>
@@ -28,20 +28,29 @@
   left: 0;
   right: 0;
   height: 60px;
-  background-color: #333;
-  color: white;
+  color: #333;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 0 20px;
   z-index: 1000;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.nav-left {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
 
 .nav-links {
   list-style: none;
   display: flex;
-  padding: 0;
   margin: 0;
 }
 
@@ -51,21 +60,27 @@
 
 .nav-links a,
 .nav-link {
-  color: white;
+  color: #333;
   text-decoration: none;
   font-size: 15px;
+  padding: 10px;
+  border-radius: 20px;
+}
+.nav-links a:hover,
+.nav-link:hover {
+  background-color: rgba(158, 157, 157, 0.3);
+  transition: background-color 0.3s ease;
 }
 
 .nav-links a.router-link-active {
-  text-decoration: underline;
+  color: #ee6464;
 }
 
 .icon-button {
   background: none;
   border: none;
-  color: white;
+  color: #333;
   font-size: 18px;
   cursor: pointer;
-  margin-right: 15px;
 }
 </style>

@@ -1,1 +1,0 @@
-<template><h2 style="padding-top: 60px">Footwear Collection</h2></template>
