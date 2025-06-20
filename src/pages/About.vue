@@ -185,7 +185,7 @@ export default {
 
 .contact-right button {
   padding: 10px;
-  background-color: #ee6464;
+  background-color: red;
   color: white;
   font-size: 15px;
   border: none;
@@ -194,7 +194,7 @@ export default {
 }
 
 .contact-right button:hover {
-  background-color: #555;
+  background-color: #d34646;
 }
 .social-icons a {
   color: white;

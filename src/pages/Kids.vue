@@ -1,1 +1,0 @@
-<template><h2 style="padding-top: 60px">Kids Section</h2></template>

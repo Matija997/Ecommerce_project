@@ -1,28 +1,39 @@
 <template>
   <div class="men-page">
-    <h3>Men's Collection</h3>
-    <div class="slider-container">
-      <div class="slider">
-        <div class="card" v-for="(item, index) in cards" :key="index">
-          <img :src="item.image" :alt="item.title" />
-          <h3>{{ item.title }}</h3>
+    <div class="men-content">
+      <h3>Men's Collection</h3>
+      <transition name="slide-in-left" appear>
+        <div class="slider-container">
+          <div class="slider">
+            <router-link 
+              v-for="(item, index) in cards" 
+              :key="index" 
+              :to="item.route" 
+              class="card-link"
+            >
+              <div class="card">
+                <img :src="item.image" :alt="item.title" />
+                <h3>{{ item.title }}</h3>
+              </div>
+            </router-link>
+          </div>
         </div>
-      </div>
+      </transition>
     </div>
   </div>
 </template>
 
 <script>
-import tshirtImage from '@/assets/t-shirt.jpg';
-import sneakersImage from '@/assets/sneakers.jpg';
-import capImage from '@/assets/cap.jpg';
+import tshirtImage from '@/assets/t-shirt.png';
+import sneakersImage from '@/assets/sneakers.png';
+import capImage from '@/assets/cap.png';
 export default {
   data() {
     return {
       cards: [
-        { title: "Clothing", image: tshirtImage  },
-        { title: "Footwear", image: sneakersImage },
-        { title: "Accessories", image: capImage },
+        { title: "Clothing", image: tshirtImage, route: "/clothing" },
+        { title: "Footwear", image: sneakersImage, route: "/footwear" },
+        { title: "Accessories", image: capImage, route: "/accessories" },
       ]
     };
   }
@@ -30,7 +41,15 @@ export default {
 </script>
 
 <style scoped>
-.men-page {
+.men-page{
+  min-height: 100vh;
+  background-image: url('@/assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow-x: hidden;
+}
+.men-content {
   text-align: center;
   padding-top: 80px;
   font-family: Arial, sans-serif;
@@ -60,12 +79,19 @@ export default {
 }
 .card:hover {
   transform: scale(1.05);
+  cursor: pointer;
+}
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  width: 300px;
 }
 
 .card img {
   width: 100%;
   height: 250px;
-  object-fit: contain; /* use 'contain' if the image should not be cropped */
+  object-fit: contain;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
 }
@@ -73,6 +99,35 @@ export default {
 .card h3 {
   padding: 10px;
   color: #333;
+}
+.slide-in-left-enter-active {
+  animation: slide-in-left 1s ease forwards;
+}
+
+.slide-in-left-leave-active {
+  animation: slide-out-left 1s ease forwards;
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
 }
 </style>
 

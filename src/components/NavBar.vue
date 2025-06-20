@@ -1,3 +1,18 @@
+<script setup>
+import { ref } from 'vue'
+import LoginModal from './LoginModal.vue'
+
+const showLoginModal = ref(false)
+
+function openLoginModal() {
+  showLoginModal.value = true
+}
+
+function closeLoginModal() {
+  showLoginModal.value = false
+}
+</script>
+
 <template>
   <nav class="navbar">
     <div class="nav-left">
@@ -5,7 +20,7 @@
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/men">Men</router-link></li>
         <li><router-link to="/women">Women</router-link></li>
-        <li><router-link to="/kids">Kids</router-link></li>
+        <li><router-link to="/sale">Sale</router-link></li>
         <li><router-link to="/about">About</router-link></li>
       </ul>
     </div>
@@ -13,12 +28,14 @@
       <button class="icon-button" title="Search">
         <i class="fas fa-search"></i>
       </button>
-      <router-link to="/login" class="nav-link" style="margin-right: 20px;">Login</router-link>
+      <a href="#" class="nav-link" @click.prevent="openLoginModal">Login</a>
       <router-link to="/cart" class="nav-link">
         <i class="fas fa-shopping-cart"></i>
       </router-link>
     </div>
   </nav>
+
+  <LoginModal v-if="showLoginModal" @close="closeLoginModal" />
 </template>
 
 <style scoped>
@@ -73,7 +90,7 @@
 }
 
 .nav-links a.router-link-active {
-  color: #ee6464;
+  color: red;
 }
 
 .icon-button {

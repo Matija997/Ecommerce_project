@@ -1,28 +1,32 @@
 <template>
   <div class="women-page">
-    <h3>Women's Collection</h3>
-    <div class="slider-container">
-      <div class="slider">
-        <div class="card" v-for="(item, index) in cards" :key="index">
-          <img :src="item.image" :alt="item.title" />
-          <h3>{{ item.title }}</h3>
+    <div class="women-content">
+      <h3>Women's Collection</h3>
+      <transition name="slide-in-right" appear>
+        <div class="slider-container">
+          <div class="slider">
+            <div class="card" v-for="(item, index) in cards" :key="index">
+              <img :src="item.image" :alt="item.title" />
+              <h3>{{ item.title }}</h3>
+            </div>
+          </div>
         </div>
-      </div>
+      </transition>
     </div>
   </div>
 </template>
 
 <script>
-import tshirtImage from '@/assets/dress.jpg';
-import sneakersImage from '@/assets/shoes.jpg';
-import capImage from '@/assets/bag.jpg';
+import dressImage from '@/assets/dress.png';
+import shoesImage from '@/assets/shoes.png';
+import bagImage from '@/assets/bag.png';
 export default {
   data() {
     return {
       cards: [
-        { title: "Clothing", image: tshirtImage  },
-        { title: "Footwear", image: sneakersImage },
-        { title: "Accessories", image: capImage },
+        { title: "Clothing", image: dressImage  },
+        { title: "Footwear", image: shoesImage },
+        { title: "Accessories", image: bagImage },
       ]
     };
   }
@@ -30,7 +34,15 @@ export default {
 </script>
 
 <style scoped>
-.women-page {
+.women-page{
+  min-height: 100vh;
+  background-image: url('@/assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow-x: hidden;
+}
+.women-content {
   text-align: center;
   padding-top: 80px;
   font-family: Arial, sans-serif;
@@ -60,6 +72,7 @@ export default {
 }
 .card:hover {
   transform: scale(1.05);
+  cursor: pointer;
 }
 
 .card img {
@@ -73,5 +86,34 @@ export default {
 .card h3 {
   padding: 10px;
   color: #333;
+}
+.slide-in-right-enter-active {
+  animation: slide-in-right 1s ease forwards;
+}
+
+.slide-in-right-leave-active {
+  animation: slide-out-right 1s ease forwards;
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 </style>

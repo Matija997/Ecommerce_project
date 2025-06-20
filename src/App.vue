@@ -1,16 +1,22 @@
 <template>
   <div id="app">
-    <NavBar />
-    <div>
-      <router-view />
-    </div>
+    <NavBar @open-login="showLoginModal = true" />
+    <router-view />
+    <LoginModal v-if="showLoginModal" @close="showLoginModal = false" />
   </div>
 </template>
 
 <script>
 import NavBar from './components/NavBar.vue'
+import LoginModal from './components/LoginModal.vue'
+
 export default {
-  components: { NavBar }
+  components: { NavBar, LoginModal },
+  data() {
+    return {
+      showLoginModal: false
+    }
+  }
 }
 </script>
 
