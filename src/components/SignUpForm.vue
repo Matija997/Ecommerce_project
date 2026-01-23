@@ -1,77 +1,107 @@
+<script>
+export default {
+  data() {
+    return {
+      name: '',
+      lastname: '',
+      email: '',
+      street: '',
+      city: '',
+      phone:'',
+      password: '',
+      confirmPassword: '',
+      showPassword: false,
+      errorMessage: ''
+    }
+  },
+  methods: {
+    
+    submitSignup() {
+      this.errorMessage = ''
+
+      if (this.password !== this.confirmPassword) {
+        this.errorMessage = 'Passwords do not match'
+        return
+      }
+
+      this.$emit('close')
+    },
+
+    addPrefix() {
+      if (!this.phone) {
+        this.phone = '+381 '
+      }
+    },
+    filterPhone() {
+      if (!this.phone.startsWith('+381')) {
+        this.phone = '+381 '
+        return
+      }
+
+      const digits = this.phone
+        .replace('+381', '')
+        .replace(/\D/g, '')
+
+      this.phone = '+381 ' + digits
+    }
+  }
+}
+</script>
 <template>
   <div class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-content">
-      <h2 class="modal-header">Login</h2>
-      <form @submit.prevent="submitLogin">
+      <h2 class="modal-header">Sign Up</h2>
+
+      <form @submit.prevent="submitSignup">
+        <input type="text" v-model="name" placeholder="First Name" required />
+        <input type="text" v-model="lastname" placeholder="Last Name" required />
         <input type="email" v-model="email" placeholder="Email" required />
+        <input type="text" v-model="street" placeholder="Address" required />
+        <input type="text" v-model="city" placeholder="City" required />
+        <input type="tel" v-model="phone" autocomplete="tel" placeholder="Phone Number" inputmode="numeric" required
+        @focus="addPrefix"
+        @input="filterPhone"/>
 
         <div class="password-input-container">
-          <input 
-            :type="showPassword ? 'text' : 'password'" 
-            v-model="password" 
-            placeholder="Password" 
-            required 
+          <input
+            :type="showPassword ? 'text' : 'password'"
+            v-model="password"
+            placeholder="Password"
+            required
           />
-          <button 
-            type="button" 
-            class="toggle-password-btn" 
-            @click="showPassword = !showPassword" 
-            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+          <button
+            type="button"
+            class="toggle-password-btn"
+            @click="showPassword = !showPassword"
           >
             <i :class="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
           </button>
         </div>
 
-        <label class="checkbox-container">
-          <input type="checkbox" v-model="keepLoggedIn" />
-          Keep me logged in
-        </label>
-        <button type="submit" class="login-btn">Login</button>
+        <div class="password-input-container">
+          <input
+            :type="showPassword ? 'text' : 'password'"
+            v-model="confirmPassword"
+            placeholder="Confirm password"
+            required
+          />
+        </div>
+        <p v-if="errorMessage" class="error-text">
+          {{ errorMessage }}
+        </p>
+
+        <button type="submit" class="login-btn">Create account</button>
       </form>
 
-      <div id="google-signin-button" class="google-btn-container"></div>
-
       <p class="signup-text">
-        Don't have an account?
-        <a href="#" @click.prevent="$emit('close'); $emit('signup')">Sign up</a>
+        Already have an account?
+        <a href="#" @click.prevent="$emit('switch-to-login')">Log in</a>
       </p>
 
       <button class="close-btn" @click="$emit('close')">×</button>
     </div>
   </div>
 </template>
-
-<script>
-import { loadGoogleScript } from '@/utils/googleOAuth.js'
-
-export default {
-  data() {
-    return {
-      email: '',
-      password: '',
-      keepLoggedIn: false,
-      showPassword: false,
-    }
-  },
-  mounted() {
-    const clientId = '673865342919-i1kb9q06nnl0lgheaqnp034istdfacin.apps.googleusercontent.com'
-    loadGoogleScript(clientId, this.handleGoogleResponse)
-  },
-  methods: {
-    submitLogin() {
-      alert(`Logging in as ${this.email}\nKeep logged in: ${this.keepLoggedIn}`)
-      this.$emit('close')
-    },
-    handleGoogleResponse(response) {
-      console.log('Google credential response:', response.credential)
-
-      alert('Logged in with Google!')
-      this.$emit('close')
-    },
-  }
-}
-</script>
-
 <style scoped>
 .modal-overlay {
   position: fixed;
@@ -100,9 +130,10 @@ export default {
   font-size: 24px;
   color: #333;
 }
-
+.modal-content input[type="text"],
 .modal-content input[type="email"],
-.modal-content input[type="password"] {
+.modal-content input[type="password"],
+.modal-content input[type="tel"] {
   width: 100%;
   padding: 10px;
   margin-bottom: 15px;
@@ -154,7 +185,7 @@ export default {
   justify-content: center;
   line-height: 1; 
 }
-.toggle-password-btn i.fa-eye-slash {
+.toggle-password-btn i{
   transform: translateY(-5px);
 }
 
@@ -168,13 +199,6 @@ export default {
   font-size: 14px;
   margin-bottom: 20px;
   user-select: none;
-}
-
-.checkbox-container input {
-  margin-right: 8px;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
 }
 
 .login-btn {
@@ -227,5 +251,11 @@ export default {
 
 .close-btn:hover {
   color: #ee6464;
+}
+
+.error-text {
+  color: #e53935;
+  font-size: 14px;
+  text-align: center;
 }
 </style>

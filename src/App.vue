@@ -8,7 +8,7 @@
 
 <script>
 import NavBar from './components/NavBar.vue'
-import LoginModal from './components/LoginModal.vue'
+import LoginModal from './components/LoginForm.vue'
 
 export default {
   components: { NavBar, LoginModal },

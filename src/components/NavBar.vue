@@ -1,15 +1,24 @@
 <script setup>
 import { ref } from 'vue'
-import LoginModal from './LoginModal.vue'
+import LoginModal from './LoginForm.vue'
+import SignupModal from './SignUpForm.vue'
 
 const showLoginModal = ref(false)
+const showSignupModal = ref(false)
 
 function openLoginModal() {
   showLoginModal.value = true
+  showSignupModal.value = false
 }
 
-function closeLoginModal() {
+function openSignupModal() {
   showLoginModal.value = false
+  showSignupModal.value = true
+}
+
+function closeModals() {
+  showLoginModal.value = false
+  showSignupModal.value = false
 }
 </script>
 
@@ -24,18 +33,37 @@ function closeLoginModal() {
         <li><router-link to="/about">About</router-link></li>
       </ul>
     </div>
+
     <div class="nav-right">
       <button class="icon-button" title="Search">
         <i class="fas fa-search"></i>
       </button>
-      <a href="#" class="nav-link" @click.prevent="openLoginModal">Login</a>
-      <router-link to="/cart" class="nav-link">
+
+      <a href="#" class="nav-link" @click.prevent="openLoginModal">
+        Login
+      </a>
+
+      <router-link to="/cart" class="nav-link" title="Cart">
         <i class="fas fa-shopping-cart"></i>
       </router-link>
+
+      <button class="icon-button" title="Menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
     </div>
   </nav>
 
-  <LoginModal v-if="showLoginModal" @close="closeLoginModal" />
+  <LoginModal
+    v-if="showLoginModal"
+    @close="closeModals"
+    @signup="openSignupModal"
+  />
+
+  <SignupModal
+    v-if="showSignupModal"
+    @close="closeModals"
+    @switch-to-login="openLoginModal"
+  />
 </template>
 
 <style scoped>
@@ -76,7 +104,7 @@ function closeLoginModal() {
 }
 
 .nav-links a,
-.nav-link {
+.nav-link, .icon-button {
   color: #333;
   text-decoration: none;
   font-size: 15px;
@@ -84,7 +112,7 @@ function closeLoginModal() {
   border-radius: 20px;
 }
 .nav-links a:hover,
-.nav-link:hover {
+.nav-link:hover, .icon-button:hover {
   background-color: rgba(158, 157, 157, 0.3);
   transition: background-color 0.3s ease;
 }
