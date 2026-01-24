@@ -11,20 +11,48 @@ export default {
       password: '',
       confirmPassword: '',
       showPassword: false,
-      errorMessage: ''
+      errorMessage: '',
+      passwordError: ''
     }
   },
   methods: {
     
-    submitSignup() {
-      this.errorMessage = ''
-
+    async submitSignup() {
+      this.passwordError = '';
+      this.errorMessage = '';
       if (this.password !== this.confirmPassword) {
-        this.errorMessage = 'Passwords do not match'
-        return
+        this.passwordError = "Passwords do not match!";
+        return;
       }
 
-      this.$emit('close')
+      try {
+        const response = await fetch('http://127.0.0.1:5000/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            first_name: this.name,
+            last_name: this.lastname,
+            email: this.email,
+            password: this.password,
+            address: this.street,
+            city: this.city,
+            phone: this.phone
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          this.errorMessage = result.message; 
+        } else {
+          this.$emit('signup-success', {
+            message: result.message,
+            email: this.email
+          });
+        }
+      } catch (err) {
+        errorMessage.value = 'Something went wrong. Please try again.';
+      }
     },
 
     addPrefix() {
@@ -42,13 +70,24 @@ export default {
         .replace('+381', '')
         .replace(/\D/g, '')
 
-      this.phone = '+381 ' + digits
+      this.phone = '+381' + digits
+    },
+    validatePassword() {
+      const password = this.password;
+      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+      if (!regex.test(password)) {
+        this.passwordError = "Password must be at least 8 characters, include one uppercase letter, one lowercase letter, and one number.";
+        return false;
+      } else {
+        this.passwordError = "";
+        return true;
+      }
     }
   }
 }
 </script>
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div class="modal-overlay">
     <div class="modal-content">
       <h2 class="modal-header">Sign Up</h2>
 
@@ -67,6 +106,7 @@ export default {
             :type="showPassword ? 'text' : 'password'"
             v-model="password"
             placeholder="Password"
+            @input="validatePassword"
             required
           />
           <button
@@ -77,6 +117,7 @@ export default {
             <i :class="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
           </button>
         </div>
+         <p v-if="passwordError" class="password-error">{{ passwordError }}</p>
 
         <div class="password-input-container">
           <input
@@ -145,7 +186,6 @@ export default {
 .password-input-container {
   position: relative;
   width: 100%;
-  margin-bottom: 15px;
 }
 
 .password-input-container input {
@@ -255,7 +295,12 @@ export default {
 
 .error-text {
   color: #e53935;
-  font-size: 14px;
+  font-size: 12px;
   text-align: center;
+}
+.password-error {
+  color:#e53935;
+  font-size: 12px;
+  margin-top: 0px;
 }
 </style>

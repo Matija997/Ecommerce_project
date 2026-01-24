@@ -1,10 +1,19 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted,  onBeforeUnmount} from 'vue'
+import { useRouter } from 'vue-router'
 import LoginModal from './LoginForm.vue'
 import SignupModal from './SignUpForm.vue'
 
+
+const router = useRouter()
 const showLoginModal = ref(false)
 const showSignupModal = ref(false)
+const loginMessage = ref('')
+const loginEmail = ref('')
+const isLoggedIn = ref(false)
+const user = ref(null)
+const showProfileMenu = ref(false)
+const profileWrapper = ref(null)
 
 function openLoginModal() {
   showLoginModal.value = true
@@ -19,6 +28,53 @@ function openSignupModal() {
 function closeModals() {
   showLoginModal.value = false
   showSignupModal.value = false
+  loginMessage.value = ''
+}
+
+function handleSignupSuccess(payload) {
+  showSignupModal.value = false
+  showLoginModal.value = true
+  loginMessage.value = payload.message
+  loginEmail.value = payload.email
+}
+
+function handleLoginSuccess(loggedUser) {
+  isLoggedIn.value = true
+  user.value = loggedUser
+}
+
+onMounted(() => {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+  const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user')
+
+  if (token && storedUser) {
+    isLoggedIn.value = true
+    user.value = JSON.parse(storedUser)
+  }
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+function toggleProfileMenu() {
+  showProfileMenu.value = !showProfileMenu.value
+}
+function handleClickOutside(event) {
+  if (profileWrapper.value && !profileWrapper.value.contains(event.target)) {
+    showProfileMenu.value = false
+  }
+}
+function goToProfile() {
+  showProfileMenu.value = false
+  router.push('/profile')
+}
+function logout() {
+  localStorage.clear()
+  sessionStorage.clear()
+  isLoggedIn.value = false
+  user.value = null
+  showProfileMenu.value = false
 }
 </script>
 
@@ -39,29 +95,39 @@ function closeModals() {
         <i class="fas fa-search"></i>
       </button>
 
-      <a href="#" class="nav-link" @click.prevent="openLoginModal">
+      <a v-if="!isLoggedIn" href="#" class="nav-link" @click.prevent="openLoginModal">
         Login
       </a>
+      <div v-else class="profile-wrapper" ref="profileWrapper">
+        <button class="icon-button" @click="toggleProfileMenu">
+          <i class="fas fa-user"></i>
+        </button>
+
+        <div v-if="showProfileMenu" class="profile-dropdown">
+          <button @click="goToProfile">My Profile</button>
+          <button @click="logout">Logout</button>
+        </div>
+      </div>
 
       <router-link to="/cart" class="nav-link" title="Cart">
         <i class="fas fa-shopping-cart"></i>
       </router-link>
-
-      <button class="icon-button" title="Menu">
-        <i class="fa-solid fa-bars"></i>
-      </button>
     </div>
   </nav>
 
   <LoginModal
     v-if="showLoginModal"
     @close="closeModals"
+    :successMessage="loginMessage"
+    :prefillEmail="loginEmail"
+    @login-success="handleLoginSuccess"
     @signup="openSignupModal"
   />
 
   <SignupModal
     v-if="showSignupModal"
     @close="closeModals"
+    @signup-success="handleSignupSuccess"
     @switch-to-login="openLoginModal"
   />
 </template>
@@ -128,4 +194,36 @@ function closeModals() {
   font-size: 18px;
   cursor: pointer;
 }
+
+.profile-wrapper {
+  position: relative;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 3000;
+}
+
+.profile-dropdown button {
+  background: none;
+  border: none;
+  padding: 10px 14px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.profile-dropdown button:hover {
+  background-color: #f2f2f2;
+}
+
 </style>

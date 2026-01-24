@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div class="modal-overlay">
     <div class="modal-content">
       <h2 class="modal-header">Login</h2>
       <form @submit.prevent="submitLogin">
@@ -20,6 +20,7 @@
             <i :class="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
           </button>
         </div>
+        <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
         <label class="checkbox-container">
           <input type="checkbox" v-model="keepLoggedIn" />
@@ -35,6 +36,10 @@
         <a href="#" @click.prevent="$emit('signup')">Sign up</a>
       </p>
 
+      <p v-if="successMessage" class="success-text">
+        {{ successMessage }}
+      </p>
+
       <button class="close-btn" @click="$emit('close')">×</button>
     </div>
   </div>
@@ -42,25 +47,69 @@
 
 <script>
 import { loadGoogleScript } from '@/utils/googleOAuth.js'
-
 export default {
   data() {
     return {
-      email: '',
+      email: this.prefillEmail || '',
       password: '',
       keepLoggedIn: false,
       showPassword: false,
+      errorMessage: ''
     }
+  },
+  watch: {
+    prefillEmail(newVal) {
+      this.email = newVal
+    }
+  },
+   props: {
+    successMessage: {
+      type: String,
+      default: ''
+    },
+    prefillEmail: String
   },
   mounted() {
     const clientId = '673865342919-i1kb9q06nnl0lgheaqnp034istdfacin.apps.googleusercontent.com'
     loadGoogleScript(clientId, this.handleGoogleResponse)
   },
   methods: {
-    submitLogin() {
-      alert(`Logging in as ${this.email}\nKeep logged in: ${this.keepLoggedIn}`)
-      this.$emit('close')
-    },
+    async submitLogin() {
+      this.errorMessage = ''
+
+      try {
+        const response = await fetch('http://127.0.0.1:5000/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: this.email,
+            password: this.password
+          })
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          this.errorMessage = result.message
+          return
+        }
+
+        if (this.keepLoggedIn) {
+          localStorage.setItem('token', result.access_token)
+          localStorage.setItem('user', JSON.stringify(result.user))
+        } else {
+          sessionStorage.setItem('token', result.access_token)
+          sessionStorage.setItem('user', JSON.stringify(result.user))
+        }
+
+        this.$emit('login-success', result.user)
+        this.$emit('close')
+
+      } catch (err) {
+        this.errorMessage = 'Server error. Try again.'
+      }
+    }
+    ,
     handleGoogleResponse(response) {
       console.log('Google credential response:', response.credential)
 
@@ -221,5 +270,18 @@ export default {
 
 .close-btn:hover {
   color: #ee6464;
+}
+
+.success-text {
+  color: green;
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: 300;
+}
+.error-text {
+  color: red;
+  font-size: small;
+  text-align: center;
+  margin-top: 0px;
 }
 </style>
