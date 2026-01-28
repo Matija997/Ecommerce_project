@@ -31,9 +31,9 @@ export default {
   data() {
     return {
       cards: [
-        { title: "Clothing", image: tshirtImage, route: "/clothing" },
-        { title: "Footwear", image: sneakersImage, route: "/footwear" },
-        { title: "Accessories", image: capImage, route: "/accessories" },
+        { title: "Clothing", image: tshirtImage, route: "/men/clothing" },
+        { title: "Footwear", image: sneakersImage, route: "/men/footwear" },
+        { title: "Accessories", image: capImage, route: "/men/accessories" },
       ]
     };
   }

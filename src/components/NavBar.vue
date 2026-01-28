@@ -3,17 +3,23 @@ import { ref, onMounted,  onBeforeUnmount} from 'vue'
 import { useRouter } from 'vue-router'
 import LoginModal from './LoginForm.vue'
 import SignupModal from './SignUpForm.vue'
+import CartModal from './Cart.vue'
 
 
 const router = useRouter()
 const showLoginModal = ref(false)
 const showSignupModal = ref(false)
+const showCartModal = ref(false)
 const loginMessage = ref('')
 const loginEmail = ref('')
 const isLoggedIn = ref(false)
 const user = ref(null)
 const showProfileMenu = ref(false)
 const profileWrapper = ref(null)
+const cartItems = ref([
+  { id: 1, name: 'T-Shirt', price: 20, quantity: 2 },
+  { id: 2, name: 'Jeans', price: 50, quantity: 1 }
+])
 
 function openLoginModal() {
   showLoginModal.value = true
@@ -109,9 +115,9 @@ function logout() {
         </div>
       </div>
 
-      <router-link to="/cart" class="nav-link" title="Cart">
+      <button class="icon-button" title="Cart" @click="showCartModal = true">
         <i class="fas fa-shopping-cart"></i>
-      </router-link>
+      </button>
     </div>
   </nav>
 
@@ -129,6 +135,13 @@ function logout() {
     @close="closeModals"
     @signup-success="handleSignupSuccess"
     @switch-to-login="openLoginModal"
+  />
+
+  <CartModal
+    v-if="showCartModal"
+    :cartItems="cartItems"
+    @close="showCartModal = false"
+    @remove="removeFromCart"
   />
 </template>
 
