@@ -111,6 +111,9 @@ function logout() {
 
         <div v-if="showProfileMenu" class="profile-dropdown">
           <button @click="goToProfile">My Profile</button>
+          <button v-if="user.role === 'admin'"@click="router.push('/admin')">
+            Admin Panel
+          </button>
           <button @click="logout">Logout</button>
         </div>
       </div>

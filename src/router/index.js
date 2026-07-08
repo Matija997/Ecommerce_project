@@ -10,6 +10,7 @@ import Clothing from '../pages/men/Clothing.vue'
 import Footwear from '../pages/men/Footwear.vue'
 import Accessories from '../pages/men/Accessories.vue'
 import ProductPage from '../pages/Product.vue'
+import Admin from '../pages/Admin.vue'
 
 
 const routes = [
@@ -22,7 +23,8 @@ const routes = [
   { path: '/sale', component: Sale },
   { path: '/about', component: About },
   { path: '/men/clothing/:productName', component: ProductPage, props: true },
-  { path: '/profile', component: Profile, meta: { requiresAuth: true }}
+  { path: '/profile', component: Profile, meta: { requiresAuth: true }},
+  { path:'/admin', component:Admin, meta:{ requiresAdmin:true }}
 ]
 
 const router = createRouter({
@@ -30,13 +32,39 @@ const router = createRouter({
   routes
 })
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token')
-  
+  const token =
+    localStorage.getItem('token') ||
+    sessionStorage.getItem('token')
+
+  const user =
+    JSON.parse(
+      localStorage.getItem('user') ||
+      sessionStorage.getItem('user')
+    )
+
+
+  // Protected pages
   if (to.meta.requiresAuth && !token) {
     next('/')
-  } else {
-    next()
+    return
   }
-})
 
+
+  // Admin only pages
+  if (to.meta.requiresAdmin) {
+
+    if (!token) {
+      next('/')
+      return
+    }
+
+    if (!user || user.role !== 'admin') {
+      next('/')
+      return
+    }
+  }
+
+
+  next()
+})
 export default router
