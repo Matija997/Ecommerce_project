@@ -9,6 +9,8 @@ import Profile from '../pages/Profile.vue'
 import Clothing from '../pages/men/Clothing.vue'
 import Footwear from '../pages/men/Footwear.vue'
 import Accessories from '../pages/men/Accessories.vue'
+import ProductPage from '../pages/Product.vue'
+
 
 const routes = [
   { path: '/', component: Home },
@@ -19,6 +21,7 @@ const routes = [
   { path: '/women', component: Women },
   { path: '/sale', component: Sale },
   { path: '/about', component: About },
+  { path: '/men/clothing/:productName', component: ProductPage, props: true },
   { path: '/profile', component: Profile, meta: { requiresAuth: true }}
 ]
 
