@@ -1,28 +1,33 @@
-<template>
-  <div id="app">
-    <NavBar @open-login="showLoginModal = true" />
-    <router-view />
-    <LoginModal v-if="showLoginModal" @close="showLoginModal = false" />
-  </div>
-</template>
-
-<script>
-import NavBar from './components/NavBar.vue'
-import LoginModal from './components/LoginForm.vue'
-
-export default {
-  components: { NavBar, LoginModal },
-  data() {
-    return {
-      showLoginModal: false
-    }
-  }
-}
+<script setup>
+import AppHeader from './components/AppHeader.vue'
+import AppFooter from './components/AppFooter.vue'
+import MarqueeBar from './components/MarqueeBar.vue'
+import SearchOverlay from './components/SearchOverlay.vue'
+import LoginModal from './components/LoginModal.vue'
+import CartDrawer from './components/CartDrawer.vue'
 </script>
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
+<template>
+  <MarqueeBar />
+  <AppHeader />
+
+  <main class="main">
+    <router-view v-slot="{ Component, route }">
+      <transition name="page-fade" mode="out-in">
+        <component :is="Component" :key="route.path" />
+      </transition>
+    </router-view>
+  </main>
+
+  <AppFooter />
+
+  <SearchOverlay />
+  <LoginModal />
+  <CartDrawer />
+</template>
+
+<style scoped>
+.main {
+  flex: 1;
 }
 </style>
