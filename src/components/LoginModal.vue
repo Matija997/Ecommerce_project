@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useStore } from '../store/useStore'
+import { loadGoogleScript } from '@/utils/googleOAuth.js'
 
 const { state, toggleLogin, login, logout } = useStore()
 
@@ -36,33 +37,95 @@ function switchMode(next) {
   error.value = ''
 }
 
-function submit() {
-  if (mode.value === 'signup' && (!firstName.value || !lastName.value)) {
-    error.value = 'Enter your first and last name.'
-    return
-  }
-
-  if (mode.value === 'signup' && (!address.value || !city.value)) {
-    error.value = 'Address and city are required.'
-    return
-  }
-  if (!email.value || !password.value) {
-    error.value = 'Enter an email and password to continue.'
-    return
-  }
-  if (password.value.length < 6) {
-    error.value = 'Password must be at least 6 characters.'
-    return
-  }
-
+async function submit() {
   error.value = ''
-  login(email.value, {
-      firstName: firstName.value,
-      lastName: lastName.value,
-      phone: phone.value,
-      address: address.value,
-      city: city.value
+
+  try {
+
+    // SIGN UP
+    if (mode.value === 'signup') {
+
+      const response = await fetch('http://localhost:5000/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          first_name: firstName.value,
+          last_name: lastName.value,
+          email: email.value,
+          password: password.value,
+          phone: phone.value,
+          address: address.value,
+          city: city.value
+        })
+      })
+
+
+      const data = await response.json()
+
+
+      if (!response.ok) {
+        error.value = data.message
+        return
+      }
+
+
+      alert(data.message)
+
+      mode.value = 'signin'
+      resetFields()
+
+      return
+    }
+
+
+
+    // LOGIN
+    const response = await fetch('http://localhost:5000/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value
+      })
     })
+
+
+    const data = await response.json()
+
+
+    if (!response.ok) {
+      error.value = data.message
+      return
+    }
+
+
+    // Save JWT token
+    localStorage.setItem(
+      'access_token',
+      data.access_token
+    )
+
+
+    // Update your Vue store
+    login(
+      data.user.email,
+      `${data.user.first_name} ${data.user.last_name}`
+    )
+
+
+    resetFields()
+
+
+  } catch (err) {
+
+    console.error(err)
+    error.value = "Cannot connect to server."
+
+  }
 }
 
 function googleSignIn() {
