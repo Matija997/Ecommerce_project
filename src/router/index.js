@@ -5,7 +5,9 @@ import Sale from '../views/Sale.vue'
 import About from '../views/About.vue'
 import ProductPage from '../views/ProductPage.vue'
 import Checkout from '../views/Checkout.vue'
+import Admin from '../views/Admin.vue'
 import NotFound from '../views/NotFound.vue'
+import { useStore } from '../store/useStore'
 
 const routes = [
   { path: '/', name: 'home', component: Home },
@@ -25,6 +27,15 @@ const routes = [
   { path: '/about', name: 'about', component: About },
   { path: '/product/:id', name: 'product', component: ProductPage },
   { path: '/checkout', name: 'checkout', component: Checkout },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: Admin,
+    beforeEnter: (to, from, next) => {
+      const { state } = useStore()
+      next(state.user?.role === 'admin' ? true : '/')
+    }
+  },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound }
 ]
 

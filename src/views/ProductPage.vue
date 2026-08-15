@@ -2,24 +2,23 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from '../store/useStore'
-import { products } from '../data/products'
+import { useProducts } from '../store/useProducts'
 import { formatPrice } from '../utils/currency'
 
 const route = useRoute()
 const { addToCart } = useStore()
+const { getById } = useProducts()
 
 const selectedSize = ref(null)
-const activeImage = ref('front')
+const activeImageIndex = ref(0)
 
-const product = computed(() =>
-  products.find((p) => p.id === route.params.id)
-)
+const product = computed(() => getById(route.params.id))
 
 watch(
   () => route.params.id,
   () => {
     selectedSize.value = null
-    activeImage.value = 'front'
+    activeImageIndex.value = 0
   }
 )
 
@@ -33,25 +32,17 @@ function addSelectedToCart() {
   <div v-if="product" class="product container">
     <div class="product__gallery">
       <div class="product__media">
-        <img
-          :src="activeImage === 'front' ? product.image : product.imageAlt"
-          :alt="product.name"
-        />
+        <img :src="product.images[activeImageIndex]" :alt="product.name" />
       </div>
       <div class="product__thumbs">
         <button
+          v-for="(image, index) in product.images"
+          :key="index"
           class="product__thumb"
-          :class="{ 'product__thumb--active': activeImage === 'front' }"
-          @click="activeImage = 'front'"
+          :class="{ 'product__thumb--active': activeImageIndex === index }"
+          @click="activeImageIndex = index"
         >
-          <img :src="product.image" :alt="product.name" />
-        </button>
-        <button
-          class="product__thumb"
-          :class="{ 'product__thumb--active': activeImage === 'back' }"
-          @click="activeImage = 'back'"
-        >
-          <img :src="product.imageAlt" :alt="`${product.name} alternate view`" />
+          <img :src="image" :alt="`${product.name} view ${index + 1}`" />
         </button>
       </div>
     </div>
@@ -72,12 +63,16 @@ function addSelectedToCart() {
         <div class="product__size-grid">
           <button
             v-for="size in product.sizes"
-            :key="size"
+            :key="size.size"
             class="product__size"
-            :class="{ 'product__size--active': selectedSize === size }"
-            @click="selectedSize = size"
+            :class="{
+              'product__size--active': selectedSize === size.size,
+              'product__size--unavailable': !size.available
+            }"
+            :disabled="!size.available"
+            @click="selectedSize = size.size"
           >
-            {{ size }}
+            {{ size.size }}
           </button>
         </div>
       </div>
@@ -119,6 +114,7 @@ function addSelectedToCart() {
 
 .product__thumbs {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 12px;
 }
@@ -211,6 +207,16 @@ function addSelectedToCart() {
   border-color: var(--ink);
   background: var(--ink);
   color: var(--paper);
+}
+
+.product__size--unavailable {
+  color: var(--taupe);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.product__size--unavailable:hover {
+  border-color: var(--line);
 }
 
 .btn:disabled {

@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
-import { getByCategory } from '../data/products'
+import { useProducts } from '../store/useProducts'
+
+const { getByCategory } = useProducts()
 
 const props = defineProps({
   category: { type: String, required: true },

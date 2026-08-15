@@ -1,8 +1,13 @@
 <script setup>
+import { computed } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
-import { products } from '../data/products'
+import { useProducts } from '../store/useProducts'
 
-const featured = products.filter((p) => p.tag === 'New').slice(0, 4)
+const { state: productState } = useProducts()
+
+const featured = computed(() =>
+  productState.products.filter((p) => p.tag === 'New').slice(0, 4)
+)
 </script>
 
 <template>

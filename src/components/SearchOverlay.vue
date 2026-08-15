@@ -2,10 +2,11 @@
 import { computed, nextTick, watch, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from '../store/useStore'
-import { searchProducts } from '../data/products'
+import { useProducts } from '../store/useProducts'
 import { formatPrice } from '../utils/currency'
 
 const { state, toggleSearch } = useStore()
+const { searchProducts } = useProducts()
 const router = useRouter()
 const inputRef = ref(null)
 

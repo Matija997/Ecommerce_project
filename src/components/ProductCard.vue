@@ -20,8 +20,13 @@ function pick(size) {
 <template>
   <article class="card">
     <router-link :to="`/product/${product.id}`" class="card__media">
-      <img :src="product.image" :alt="product.name" class="card__img card__img--front" loading="lazy" />
-      <img :src="product.imageAlt" :alt="`${product.name} alternate view`" class="card__img card__img--back" loading="lazy" />
+      <img :src="product.images[0]" :alt="product.name" class="card__img card__img--front" loading="lazy" />
+      <img
+        :src="product.images[1] || product.images[0]"
+        :alt="`${product.name} alternate view`"
+        class="card__img card__img--back"
+        loading="lazy"
+      />
 
       <span v-if="product.tag" class="card__tag" :class="{ 'card__tag--sale': product.tag === 'Sale' }">
         {{ product.tag }}
@@ -34,11 +39,13 @@ function pick(size) {
       <div v-if="showSizes" class="card__sizes" @click.stop.prevent>
         <button
           v-for="size in product.sizes"
-          :key="size"
+          :key="size.size"
           class="card__size"
-          @click="pick(size)"
+          :class="{ 'card__size--unavailable': !size.available }"
+          :disabled="!size.available"
+          @click="pick(size.size)"
         >
-          {{ size }}
+          {{ size.size }}
         </button>
       </div>
     </router-link>
@@ -158,6 +165,17 @@ function pick(size) {
 .card__size:hover {
   border-color: var(--ink);
   background: var(--stone);
+}
+
+.card__size--unavailable {
+  color: var(--taupe);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.card__size--unavailable:hover {
+  border-color: var(--line);
+  background: transparent;
 }
 
 .card__info {

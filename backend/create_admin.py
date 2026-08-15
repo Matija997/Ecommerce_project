@@ -10,7 +10,7 @@ with app.app_context():
 
     # Check if admin already exists
     existing_admin = User.query.filter_by(
-        email="admin@test.com"
+        email="admin@admin.com"
     ).first()
 
     if existing_admin:
@@ -19,9 +19,9 @@ with app.app_context():
         admin = User(
             first_name="Admin",
             last_name="User",
-            email="admin@test.com",
+            email="admin@admin.com",
             password=bcrypt.generate_password_hash(
-                "Admin123"
+                "admin"
             ).decode('utf-8'),
             phone="+381601234567",
             address="Admin Street",

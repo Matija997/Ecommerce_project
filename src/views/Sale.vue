@@ -1,8 +1,11 @@
 <script setup>
+import { computed } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
-import { getOnSale } from '../data/products'
+import { useProducts } from '../store/useProducts'
 
-const saleItems = getOnSale()
+const { getOnSale } = useProducts()
+
+const saleItems = computed(() => getOnSale())
 </script>
 
 <template>

@@ -298,6 +298,15 @@ function close() {
           <span class="eyebrow">Account</span>
           <h3 class="modal__title">Hi, {{ state.user.name }}</h3>
           <p class="modal__foot" style="margin-bottom: 20px;">{{ state.user.email }}</p>
+          <router-link
+            v-if="state.user.role === 'admin'"
+            to="/admin"
+            class="btn btn-outline"
+            style="width: 100%; margin-bottom: 12px;"
+            @click="close"
+          >
+            Admin Panel
+          </router-link>
           <button class="btn btn-outline" style="width: 100%;" @click="logout">
             Sign out
           </button>
