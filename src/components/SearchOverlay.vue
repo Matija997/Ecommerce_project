@@ -1,9 +1,12 @@
 <script setup>
 import { computed, nextTick, watch, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useStore } from '../store/useStore'
 import { searchProducts } from '../data/products'
+import { formatPrice } from '../utils/currency'
 
-const { state, toggleSearch, addToCart } = useStore()
+const { state, toggleSearch } = useStore()
+const router = useRouter()
 const inputRef = ref(null)
 
 const results = computed(() => searchProducts(state.searchQuery))
@@ -18,8 +21,9 @@ watch(
   }
 )
 
-function quickAdd(product) {
-  addToCart(product, product.sizes[0])
+function openProduct(product) {
+  toggleSearch(false)
+  router.push(`/product/${product.id}`)
 }
 </script>
 
@@ -61,12 +65,12 @@ function quickAdd(product) {
               v-for="product in results"
               :key="product.id"
               class="overlay__result"
-              @click="quickAdd(product)"
+              @click="openProduct(product)"
             >
               <img :src="product.image" :alt="product.name" />
               <span class="overlay__result-name">{{ product.name }}</span>
               <span class="overlay__result-price">
-                ${{ product.salePrice || product.price }}
+                {{ formatPrice(product.salePrice || product.price) }}
               </span>
             </button>
           </div>
@@ -110,6 +114,7 @@ function quickAdd(product) {
 
 .overlay__input-wrap {
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -118,6 +123,7 @@ function quickAdd(product) {
 
 .overlay__input {
   flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
   font-family: var(--font-display);

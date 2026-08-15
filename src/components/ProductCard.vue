@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useStore } from '../store/useStore'
+import { formatPrice } from '../utils/currency'
 
 const props = defineProps({
   product: { type: Object, required: true }
@@ -18,7 +19,7 @@ function pick(size) {
 
 <template>
   <article class="card">
-    <div class="card__media">
+    <router-link :to="`/product/${product.id}`" class="card__media">
       <img :src="product.image" :alt="product.name" class="card__img card__img--front" loading="lazy" />
       <img :src="product.imageAlt" :alt="`${product.name} alternate view`" class="card__img card__img--back" loading="lazy" />
 
@@ -26,11 +27,11 @@ function pick(size) {
         {{ product.tag }}
       </span>
 
-      <button class="card__add" @click="showSizes = !showSizes">
+      <button class="card__add" @click.stop.prevent="showSizes = !showSizes">
         {{ showSizes ? 'Close' : 'Quick add' }}
       </button>
 
-      <div v-if="showSizes" class="card__sizes">
+      <div v-if="showSizes" class="card__sizes" @click.stop.prevent>
         <button
           v-for="size in product.sizes"
           :key="size"
@@ -40,14 +41,14 @@ function pick(size) {
           {{ size }}
         </button>
       </div>
-    </div>
+    </router-link>
 
     <div class="card__info">
-      <h4 class="card__name">{{ product.name }}</h4>
+      <router-link :to="`/product/${product.id}`" class="card__name">{{ product.name }}</router-link>
       <div class="card__price">
-        <span v-if="product.salePrice" class="card__price--was">${{ product.price }}</span>
+        <span v-if="product.salePrice" class="card__price--was">{{ formatPrice(product.price) }}</span>
         <span :class="{ 'card__price--sale': product.salePrice }">
-          ${{ product.salePrice || product.price }}
+          {{ formatPrice(product.salePrice || product.price) }}
         </span>
       </div>
     </div>
@@ -58,9 +59,11 @@ function pick(size) {
 .card {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .card__media {
+  display: block;
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
@@ -173,10 +176,10 @@ function pick(size) {
 
 .card__price {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px 8px;
   font-size: 0.9rem;
   font-weight: 600;
-  white-space: nowrap;
 }
 
 .card__price--was {

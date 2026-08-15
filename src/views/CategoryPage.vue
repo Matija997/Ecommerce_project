@@ -10,6 +10,7 @@ const props = defineProps({
 
 const sort = ref('featured')
 const filter = ref('all')
+const subtype = ref('all')
 
 const base = computed(() => getByCategory(props.category))
 
@@ -17,6 +18,7 @@ const filtered = computed(() => {
   let list = base.value
   if (filter.value === 'new') list = list.filter((p) => p.tag === 'New')
   if (filter.value === 'sale') list = list.filter((p) => p.salePrice)
+  if (subtype.value !== 'all') list = list.filter((p) => p.subtype === subtype.value)
   return list
 })
 
@@ -56,14 +58,33 @@ const sorted = computed(() => {
         </button>
       </div>
 
-      <label class="category__sort">
-        Sort by
-        <select v-model="sort">
-          <option value="featured">Featured</option>
-          <option value="price-asc">Price: Low to High</option>
-          <option value="price-desc">Price: High to Low</option>
-        </select>
-      </label>
+      <div class="category__selects">
+        <label class="category__sort">
+          Category
+          <select v-model="subtype">
+            <option value="all">All Categories</option>
+            <optgroup label="Clothing">
+              <option value="tshirt">T-Shirts</option>
+              <option value="jacket">Jacket</option>
+              <option value="denim">Denim</option>
+            </optgroup>
+            <optgroup label="Accessories">
+              <option value="glasses">Glasses</option>
+              <option value="hats">Hats</option>
+              <option value="bags">Bags</option>
+            </optgroup>
+          </select>
+        </label>
+
+        <label class="category__sort">
+          Sort by
+          <select v-model="sort">
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </label>
+      </div>
     </div>
 
     <section class="container category__grid">
@@ -106,6 +127,13 @@ const sorted = computed(() => {
 .category__filters {
   display: flex;
   gap: 10px;
+}
+
+.category__selects {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .category__chip {
@@ -172,6 +200,12 @@ const sorted = computed(() => {
   .category__bar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .category__selects {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 }
 </style>

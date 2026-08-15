@@ -4,9 +4,14 @@ import { reactive, computed } from 'vue'
 // Everything lives in one reactive object so any component
 // can import `state` and get live updates.
 
+// "Stay logged in" -> localStorage (survives browser restarts).
+// Otherwise -> sessionStorage (cleared when the tab/browser closes).
+const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user')
+const storedToken = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
+
 const state = reactive({
   cart: [], // { id, name, price, size, qty, image }
-  user: null, // { name, email }
+  user: storedUser && storedToken ? JSON.parse(storedUser) : null, // { id, name, email, role }
   isCartOpen: false,
   isSearchOpen: false,
   isLoginOpen: false,
@@ -42,6 +47,10 @@ function updateQty(id, size, qty) {
   if (item) item.qty = Math.max(1, qty)
 }
 
+function clearCart() {
+  state.cart = []
+}
+
 const cartCount = computed(() =>
   state.cart.reduce((sum, item) => sum + item.qty, 0)
 )
@@ -50,17 +59,25 @@ const cartTotal = computed(() =>
   state.cart.reduce((sum, item) => sum + item.qty * item.price, 0)
 )
 
-function login(email, name) {
-  const fallback = email.split('@')[0]
-  const displayName = name?.trim()
-    ? name.trim()
-    : fallback.charAt(0).toUpperCase() + fallback.slice(1)
-  state.user = { name: displayName, email }
+function login(user, token, remember = false) {
+  state.user = user
   state.isLoginOpen = false
+
+  const store = remember ? localStorage : sessionStorage
+  const other = remember ? sessionStorage : localStorage
+  other.removeItem('user')
+  other.removeItem('access_token')
+
+  store.setItem('user', JSON.stringify(user))
+  if (token) store.setItem('access_token', token)
 }
 
 function logout() {
   state.user = null
+  localStorage.removeItem('user')
+  localStorage.removeItem('access_token')
+  sessionStorage.removeItem('user')
+  sessionStorage.removeItem('access_token')
 }
 
 function toggleCart(force) {
@@ -82,6 +99,7 @@ export function useStore() {
     addToCart,
     removeFromCart,
     updateQty,
+    clearCart,
     cartCount,
     cartTotal,
     login,

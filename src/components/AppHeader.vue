@@ -36,6 +36,8 @@ const links = [
 
       <router-link to="/" class="header__logo">FRISO</router-link>
 
+      <div v-if="menuOpen" class="header__nav-scrim" @click="menuOpen = false"></div>
+
       <nav class="header__nav" :class="{ 'header__nav--open': menuOpen }">
         <router-link
           v-for="link in links"
@@ -222,11 +224,32 @@ const links = [
     display: flex;
   }
 
-  .header__nav {
-    position: fixed;
-    top: var(--header-h);
+  .header__row {
+    position: relative;
+  }
+
+  .header__logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .header__nav-scrim {
+    position: absolute;
+    top: 100%;
     left: 0;
     right: 0;
+    height: 100vh;
+    background: rgba(17, 17, 17, 0.5);
+  }
+
+  .header__nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 0;
     background: var(--paper);
     border-bottom: 1px solid var(--line);
     flex-direction: column;
@@ -241,6 +264,7 @@ const links = [
   .header__nav--open {
     max-height: 320px;
     padding: 8px 0;
+    box-shadow: 0 4px 10px rgba(17, 17, 17, 0.08);
   }
 
   .header__link {

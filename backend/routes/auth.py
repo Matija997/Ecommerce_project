@@ -1,8 +1,13 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from extensions import db, bcrypt
 from flask_jwt_extended import create_access_token
 from models.user import User
 import re
+import json
+import secrets
+import urllib.request
+import urllib.error
+import urllib.parse
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -13,7 +18,7 @@ def signup():
 
     # Required fields
     required_fields = ['first_name', 'last_name', 'email', 'password',
-                       'address', 'city']
+                       'phone', 'address', 'city']
     for field in required_fields:
         if not data.get(field):
             return jsonify({'message': f'{field} is required'}), 400
@@ -35,8 +40,8 @@ def signup():
         return jsonify({'message': 'Weak password'}), 400
 
     # Phone validation
-    phone = data.get('phone')
-    if phone and not re.match(r'^\+381\d{6,12}$', phone):
+    phone = data['phone']
+    if not re.match(r'^\+381\d{6,12}$', phone):
         return jsonify({'message': 'Invalid phone'}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -59,15 +64,76 @@ def signup():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    data = request.json
+    data = request.json or {}
 
-    user = User.query.filter_by(email=data['email']).first()
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({'message': 'Email and password are required'}), 400
+
+    user = User.query.filter_by(email=email).first()
 
     if not user:
         return jsonify({'message': 'Email does not exist'}), 404
 
-    if not bcrypt.check_password_hash(user.password, data['password']):
+    if not bcrypt.check_password_hash(user.password, password):
         return jsonify({'message': 'Wrong password'}), 401
+
+    token = create_access_token(identity=str(user.id))
+
+    return jsonify({
+        'access_token': token,
+        'user': {
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'role': user.role
+        }
+    })
+
+
+@auth_bp.route('/auth/google', methods=['POST'])
+def google_auth():
+    data = request.json or {}
+    credential = data.get('credential')
+
+    if not credential:
+        return jsonify({'message': 'Missing Google credential'}), 400
+
+    query = urllib.parse.urlencode({'id_token': credential})
+    try:
+        with urllib.request.urlopen(
+            f'https://oauth2.googleapis.com/tokeninfo?{query}', timeout=5
+        ) as resp:
+            payload = json.loads(resp.read())
+    except urllib.error.HTTPError:
+        return jsonify({'message': 'Invalid Google token'}), 401
+    except urllib.error.URLError:
+        return jsonify({'message': 'Could not reach Google to verify token'}), 502
+
+    if payload.get('aud') != current_app.config['GOOGLE_CLIENT_ID']:
+        return jsonify({'message': 'Google token was not issued for this app'}), 401
+
+    if payload.get('email_verified') != 'true':
+        return jsonify({'message': 'Google email is not verified'}), 401
+
+    email = payload['email']
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        random_password = bcrypt.generate_password_hash(
+            secrets.token_hex(32)
+        ).decode('utf-8')
+        user = User(
+            first_name=payload.get('given_name', ''),
+            last_name=payload.get('family_name', ''),
+            email=email,
+            password=random_password
+        )
+        db.session.add(user)
+        db.session.commit()
 
     token = create_access_token(identity=str(user.id))
 

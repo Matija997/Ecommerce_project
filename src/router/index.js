@@ -3,6 +3,8 @@ import Home from '../views/Home.vue'
 import CategoryPage from '../views/CategoryPage.vue'
 import Sale from '../views/Sale.vue'
 import About from '../views/About.vue'
+import ProductPage from '../views/ProductPage.vue'
+import Checkout from '../views/Checkout.vue'
 import NotFound from '../views/NotFound.vue'
 
 const routes = [
@@ -21,6 +23,8 @@ const routes = [
   },
   { path: '/sale', name: 'sale', component: Sale },
   { path: '/about', name: 'about', component: About },
+  { path: '/product/:id', name: 'product', component: ProductPage },
+  { path: '/checkout', name: 'checkout', component: Checkout },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound }
 ]
 

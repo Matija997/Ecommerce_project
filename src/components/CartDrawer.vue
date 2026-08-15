@@ -1,7 +1,15 @@
 <script setup>
+import { useRouter } from 'vue-router'
 import { useStore } from '../store/useStore'
+import { formatPrice } from '../utils/currency'
 
 const { state, cartTotal, removeFromCart, updateQty, toggleCart } = useStore()
+const router = useRouter()
+
+function goToCheckout() {
+  toggleCart(false)
+  router.push('/checkout')
+}
 </script>
 
 <template>
@@ -33,7 +41,7 @@ const { state, cartTotal, removeFromCart, updateQty, toggleCart } = useStore()
                   <span>{{ item.qty }}</span>
                   <button @click="updateQty(item.id, item.size, item.qty + 1)">+</button>
                 </div>
-                <span class="drawer__item-price">${{ item.qty * item.price }}</span>
+                <span class="drawer__item-price">{{ formatPrice(item.qty * item.price) }}</span>
               </div>
             </div>
             <button class="drawer__remove" aria-label="Remove item" @click="removeFromCart(item.id, item.size)">
@@ -45,9 +53,9 @@ const { state, cartTotal, removeFromCart, updateQty, toggleCart } = useStore()
         <div v-if="state.cart.length > 0" class="drawer__foot">
           <div class="drawer__total">
             <span>Subtotal</span>
-            <span>${{ cartTotal }}</span>
+            <span>{{ formatPrice(cartTotal) }}</span>
           </div>
-          <button class="btn" style="width: 100%;">Checkout</button>
+          <button class="btn" style="width: 100%;" @click="goToCheckout">Checkout</button>
         </div>
       </aside>
     </div>

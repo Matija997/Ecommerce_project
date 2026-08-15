@@ -13,3 +13,5 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_SECRET_KEY = 'super-secret-key'
+
+    GOOGLE_CLIENT_ID = '673865342919-i1kb9q06nnl0lgheaqnp034istdfacin.apps.googleusercontent.com'

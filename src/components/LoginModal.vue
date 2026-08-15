@@ -1,7 +1,9 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStore } from '../store/useStore'
-import { loadGoogleScript } from '@/utils/googleOAuth.js'
+import { initGoogleAuth, googleLogin } from '@/utils/googleOAuth.js'
+
+const GOOGLE_CLIENT_ID = '673865342919-i1kb9q06nnl0lgheaqnp034istdfacin.apps.googleusercontent.com'
 
 const { state, toggleLogin, login, logout } = useStore()
 
@@ -16,9 +18,14 @@ const city = ref('')
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const rememberMe = ref(false)
 const error = ref('')
 
 const title = computed(() => (mode.value === 'signin' ? 'Sign in' : 'Create account'))
+
+onMounted(() => {
+  initGoogleAuth(GOOGLE_CLIENT_ID, handleGoogleCredential)
+})
 
 function resetFields() {
   firstName.value = ''
@@ -103,17 +110,16 @@ async function submit() {
     }
 
 
-    // Save JWT token
-    localStorage.setItem(
-      'access_token',
-      data.access_token
-    )
-
-
-    // Update your Vue store
+    // Update the Vue store (also persists the user + token)
     login(
-      data.user.email,
-      `${data.user.first_name} ${data.user.last_name}`
+      {
+        id: data.user.id,
+        name: `${data.user.first_name} ${data.user.last_name}`,
+        email: data.user.email,
+        role: data.user.role
+      },
+      data.access_token,
+      rememberMe.value
     )
 
 
@@ -128,11 +134,46 @@ async function submit() {
   }
 }
 
-function googleSignIn() {
-  // Demo stand-in for a real OAuth flow (e.g. Google Identity Services).
+async function handleGoogleCredential(response) {
   error.value = ''
-  login('demo.user@gmail.com', 'Demo User')
-  resetFields()
+
+  try {
+    const res = await fetch('http://localhost:5000/auth/google', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ credential: response.credential })
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      error.value = data.message
+      return
+    }
+
+    login(
+      {
+        id: data.user.id,
+        name: `${data.user.first_name} ${data.user.last_name}`,
+        email: data.user.email,
+        role: data.user.role
+      },
+      data.access_token,
+      rememberMe.value
+    )
+
+    resetFields()
+  } catch (err) {
+    console.error(err)
+    error.value = 'Cannot connect to server.'
+  }
+}
+
+function googleSignIn() {
+  error.value = ''
+  googleLogin()
 }
 
 function close() {
@@ -170,7 +211,7 @@ function close() {
             <!-- PHONE -->
             <label v-if="mode === 'signup'" class="modal__label">
               Phone
-              <input v-model="phone" type="text" placeholder="+381601234567" />
+              <input v-model="phone" type="text" placeholder="+381601234567" required />
             </label>
 
             <!-- ADDRESS -->
@@ -216,6 +257,11 @@ function close() {
                   </svg>
                 </button>
               </div>
+            </label>
+
+            <label v-if="mode === 'signin'" class="modal__remember">
+              <input v-model="rememberMe" type="checkbox" />
+              Stay logged in
             </label>
 
             <p v-if="error" class="modal__error">{{ error }}</p>
@@ -404,6 +450,24 @@ function close() {
 
 .modal__toggle-visibility:hover {
   color: var(--ink);
+}
+
+.modal__remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.modal__remember input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ink);
 }
 
 .modal__error {
