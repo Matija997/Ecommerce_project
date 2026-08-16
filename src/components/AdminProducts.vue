@@ -19,6 +19,7 @@ const SUBTYPES_BY_TYPE = {
 }
 
 const MIN_IMAGES = 3
+const DISCOUNT_OPTIONS = [10, 20, 30, 40]
 
 function emptyForm() {
   return {
@@ -27,11 +28,21 @@ function emptyForm() {
     type: 'clothing',
     subtype: 'tshirt',
     price: '',
-    salePrice: '',
+    discount: '',
     tag: '',
     images: ['', '', ''],
     sizesText: ''
   }
+}
+
+function nearestDiscount(price, salePrice) {
+  if (!price || !salePrice) return ''
+  const pct = ((price - salePrice) / price) * 100
+  return String(
+    DISCOUNT_OPTIONS.reduce((closest, opt) =>
+      Math.abs(pct - opt) < Math.abs(pct - closest) ? opt : closest
+    )
+  )
 }
 
 const loading = ref(true)
@@ -47,6 +58,11 @@ const subtypeOptions = computed(() => SUBTYPES_BY_TYPE[form.type])
 const sizeChips = computed(() =>
   form.sizesText.split(',').map((s) => s.trim()).filter(Boolean)
 )
+
+const computedSalePrice = computed(() => {
+  if (!form.discount || !form.price) return null
+  return Math.round((Number(form.price) * (1 - Number(form.discount) / 100)) / 10) * 10
+})
 
 function toggleSizeAvailability(size) {
   const next = new Set(unavailableSizes.value)
@@ -92,7 +108,7 @@ function openEditForm(product) {
     type: product.type,
     subtype: product.subtype,
     price: product.price,
-    salePrice: product.salePrice || '',
+    discount: nearestDiscount(product.price, product.salePrice),
     tag: product.tag || '',
     images: [...product.images],
     sizesText: product.sizes.map((s) => s.size).join(', ')
@@ -122,7 +138,7 @@ async function submitForm() {
     type: form.type,
     subtype: form.subtype,
     price: Number(form.price),
-    salePrice: form.salePrice ? Number(form.salePrice) : null,
+    salePrice: computedSalePrice.value,
     tag: form.tag || null,
     images: form.images.map((url) => url.trim()).filter(Boolean),
     sizes: sizeChips.value.map((size) => ({
@@ -274,8 +290,13 @@ async function deleteProduct(product) {
               <input v-model.number="form.price" type="number" min="1" required />
             </label>
             <label class="admin__label">
-              Sale Price (RSD)
-              <input v-model.number="form.salePrice" type="number" min="1" placeholder="Optional" />
+              Discount
+              <select v-model="form.discount">
+                <option value="">No discount</option>
+                <option v-for="opt in [10, 20, 30, 40]" :key="opt" :value="String(opt)">
+                  {{ opt }}% off
+                </option>
+              </select>
             </label>
             <label class="admin__label">
               Tag
@@ -286,6 +307,11 @@ async function deleteProduct(product) {
               </select>
             </label>
           </div>
+
+          <p v-if="computedSalePrice" class="admin__hint">
+            Sale price: {{ formatPrice(computedSalePrice) }}
+            <span class="admin__was">{{ formatPrice(form.price) }}</span>
+          </p>
 
           <div class="admin__images">
             <span class="admin__label-text">Images (at least {{ MIN_IMAGES }}, or leave all blank for placeholders)</span>
