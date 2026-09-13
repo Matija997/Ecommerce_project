@@ -11,3 +11,15 @@ class User(db.Model):
     address = db.Column(db.String(255))
     city = db.Column(db.String(30))
     role = db.Column(db.String(20), default='user')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email,
+            'phone': self.phone,
+            'address': self.address,
+            'city': self.city,
+            'role': self.role
+        }

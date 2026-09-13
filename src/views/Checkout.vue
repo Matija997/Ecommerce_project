@@ -21,6 +21,8 @@ const cardCvc = ref('')
 const placed = ref(false)
 const orderNumber = ref('')
 const continuingAsGuest = ref(false)
+const placing = ref(false)
+const placeError = ref('')
 
 const showGuestPrompt = computed(() => !state.user && !continuingAsGuest.value)
 
@@ -68,10 +70,52 @@ function continueAsGuest() {
   continuingAsGuest.value = true
 }
 
-function placeOrder() {
-  orderNumber.value = 'FR' + Date.now().toString(36).toUpperCase()
-  placed.value = true
-  clearCart()
+async function placeOrder() {
+  placeError.value = ''
+  placing.value = true
+
+  try {
+    const res = await fetch('http://localhost:5000/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name: firstName.value,
+        last_name: lastName.value,
+        email: email.value,
+        phone: phone.value,
+        address: address.value,
+        city: city.value,
+        payment_method: paymentMethod.value,
+        items: state.cart.map((item) => ({
+          product_id: item.id,
+          name: item.name,
+          image: item.image,
+          size: item.size,
+          qty: item.qty,
+          price: item.price
+        })),
+        subtotal: cartTotal.value,
+        shipping_fee: shippingFee.value,
+        total: orderTotal.value
+      })
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      placeError.value = data.message || 'Could not place order.'
+      return
+    }
+
+    orderNumber.value = data.order_number
+    placed.value = true
+    clearCart()
+  } catch (err) {
+    console.error(err)
+    placeError.value = 'Cannot connect to server.'
+  } finally {
+    placing.value = false
+  }
 }
 </script>
 
@@ -204,8 +248,10 @@ function placeOrder() {
             </p>
           </section>
 
-          <button type="submit" class="btn" style="width: 100%;">
-            Place Order — {{ formatPrice(orderTotal) }}
+          <p v-if="placeError" class="checkout__error">{{ placeError }}</p>
+
+          <button type="submit" class="btn" style="width: 100%;" :disabled="placing">
+            {{ placing ? 'Placing Order…' : `Place Order — ${formatPrice(orderTotal)}` }}
           </button>
         </form>
 
@@ -332,6 +378,11 @@ function placeOrder() {
   font-size: 0.78rem;
   color: var(--taupe);
   margin-top: -8px;
+}
+
+.checkout__error {
+  color: var(--accent);
+  font-size: 0.85rem;
 }
 
 .checkout__row {

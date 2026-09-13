@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from extensions import db
 from models.product import Product
-from routes.admin import get_admin_or_error
+from routes.admin import get_staff_or_error
 
 products_bp = Blueprint('products', __name__)
 
@@ -102,7 +102,7 @@ def get_product(product_id):
 @products_bp.route('/products', methods=['POST'])
 @jwt_required()
 def create_product():
-    _, error = get_admin_or_error()
+    _, error = get_staff_or_error()
     if error:
         return error
 
@@ -132,7 +132,7 @@ def create_product():
 @products_bp.route('/products/<int:product_id>', methods=['PUT'])
 @jwt_required()
 def update_product(product_id):
-    _, error = get_admin_or_error()
+    _, error = get_staff_or_error()
     if error:
         return error
 
@@ -163,7 +163,7 @@ def update_product(product_id):
 @products_bp.route('/products/<int:product_id>', methods=['DELETE'])
 @jwt_required()
 def delete_product(product_id):
-    _, error = get_admin_or_error()
+    _, error = get_staff_or_error()
     if error:
         return error
 

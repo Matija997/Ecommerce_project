@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from extensions import db, bcrypt
 from flask_jwt_extended import create_access_token
 from models.user import User
-import re
+from validators import validate_email_format, validate_password_strength, validate_phone_format
 import json
 import secrets
 import urllib.request
@@ -24,7 +24,7 @@ def signup():
             return jsonify({'message': f'{field} is required'}), 400
 
     # Email format
-    if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', data['email']):
+    if not validate_email_format(data['email']):
         return jsonify({'message': 'Invalid email'}), 400
 
     # Email exists
@@ -33,15 +33,12 @@ def signup():
 
     # Password validation
     password = data['password']
-    if (len(password) < 8 or
-        not re.search(r'[A-Z]', password) or
-        not re.search(r'[a-z]', password) or
-        not re.search(r'[0-9]', password)):
+    if not validate_password_strength(password):
         return jsonify({'message': 'Weak password'}), 400
 
     # Phone validation
     phone = data['phone']
-    if not re.match(r'^\+381\d{6,12}$', phone):
+    if not validate_phone_format(phone):
         return jsonify({'message': 'Invalid phone'}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -59,7 +56,19 @@ def signup():
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({'message': 'User created'}), 201
+    token = create_access_token(identity=str(user.id))
+
+    return jsonify({
+        'message': 'User created',
+        'access_token': token,
+        'user': {
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'role': user.role
+        }
+    }), 201
 
 
 @auth_bp.route('/login', methods=['POST'])
