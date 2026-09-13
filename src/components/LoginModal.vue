@@ -78,9 +78,17 @@ async function submit() {
       }
 
 
-      alert(data.message)
+      login(
+        {
+          id: data.user.id,
+          name: `${data.user.first_name} ${data.user.last_name}`,
+          email: data.user.email,
+          role: data.user.role
+        },
+        data.access_token,
+        rememberMe.value
+      )
 
-      mode.value = 'signin'
       resetFields()
 
       return
@@ -299,7 +307,7 @@ function close() {
           <h3 class="modal__title">Hi, {{ state.user.name }}</h3>
           <p class="modal__foot" style="margin-bottom: 20px;">{{ state.user.email }}</p>
           <router-link
-            v-if="state.user.role === 'admin'"
+            v-if="['admin', 'editor'].includes(state.user.role)"
             to="/admin"
             class="btn btn-outline"
             style="width: 100%; margin-bottom: 12px;"

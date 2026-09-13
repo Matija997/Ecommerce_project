@@ -20,25 +20,18 @@ const year = new Date().getFullYear()
       <div class="footer__col">
         <span class="eyebrow">Company</span>
         <router-link to="/about">About</router-link>
-        <a href="#">Sustainability</a>
-        <a href="#">Careers</a>
       </div>
 
       <div class="footer__col">
         <span class="eyebrow">Help</span>
         <a href="#">Shipping &amp; Returns</a>
         <a href="#">Size Guide</a>
-        <a href="#">Contact</a>
+        <router-link to="/about#contact">Contact</router-link>
       </div>
     </div>
 
     <div class="container footer__bottom">
       <span>© {{ year }} FRISO. All rights reserved.</span>
-      <div class="footer__socials">
-        <a href="#" aria-label="Instagram">IG</a>
-        <a href="#" aria-label="TikTok">TT</a>
-        <a href="#" aria-label="Pinterest">PIN</a>
-      </div>
     </div>
   </footer>
 </template>
@@ -92,17 +85,6 @@ const year = new Date().getFullYear()
   padding: 20px 32px 28px;
   font-size: 0.78rem;
   color: #9e988a;
-}
-
-.footer__socials {
-  display: flex;
-  gap: 16px;
-}
-
-.footer__socials a {
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  color: #cfc9bc;
 }
 
 @media (max-width: 860px) {

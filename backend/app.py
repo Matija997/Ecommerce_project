@@ -8,6 +8,8 @@ from routes.auth import auth_bp
 from routes.users import user_bp
 from routes.admin import admin_bp
 from routes.products import products_bp
+from routes.contact import contact_bp
+from routes.orders import orders_bp
 
 
 app = Flask(__name__)
@@ -24,6 +26,8 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(products_bp)
+app.register_blueprint(contact_bp)
+app.register_blueprint(orders_bp)
 
 if __name__ == '__main__':
     with app.app_context():

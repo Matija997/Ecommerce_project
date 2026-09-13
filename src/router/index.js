@@ -33,7 +33,7 @@ const routes = [
     component: Admin,
     beforeEnter: (to, from, next) => {
       const { state } = useStore()
-      next(state.user?.role === 'admin' ? true : '/')
+      next(['admin', 'editor'].includes(state.user?.role) ? true : '/')
     }
   },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound }
@@ -42,7 +42,10 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior() {
+  scrollBehavior(to) {
+    if (to.hash) {
+      return { el: to.hash, top: 96, behavior: 'smooth' }
+    }
     return { top: 0 }
   }
 })
